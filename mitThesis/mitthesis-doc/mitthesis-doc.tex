@@ -1,0 +1,812 @@
+% !TEX TS-program = lualatex
+% !TEX encoding = UTF-8 Unicode
+% !BIB TS-program = biber
+
+% Version date: 2026/07/27
+
+\DocumentMetadata 
+{
+	lang = en-US,
+	pdfstandard = { ua-2, a-4f },
+	tagging = on % this doc uses tagging commands, tagging must be on
+}
+
+%%%%%%%%%%%%%%%
+
+\documentclass[11pt]{article}
+
+\usepackage[letterpaper,margin=1in,footskip=0.5in]{geometry} 
+\usepackage[x11names,svgnames,dvipsnames,table]{xcolor}
+\usepackage{luacolor} % load AFTER xcolor
+\usepackage{mathtools}
+
+\usepackage[en-US]{datetime2} %% change default date format
+\makeatletter
+\newcommand{\daymonthyeardate}{%
+  \DTMenglishordinal{\@dtm@day}\space\DTMenglishmonthname{\@dtm@month} \@dtm@year
+}
+\makeatother
+
+\usepackage{booktabs}
+\usepackage{multicol} % for the two-column nomenclature example
+
+\usepackage{etoolbox} % tag abstractname as strong for html conversion
+\patchcmd{\abstract}
+  {\bfseries \abstractname}%
+  {\bfseries 
+  			 \leavevmode
+			 \tagstructbegin { tag=Strong }%
+             \tagmcbegin     { tag=Strong }%
+             \abstractname
+             \tagmcend
+             \tagstructend
+             }{}{}
+
+\tagpdfsetup
+	{
+  	css-list-add = { mitthesis-style.css } % attach CSS file
+	}
+
+\newcommand*\pdfTeX{pdf\TeX}
+\newcommand*\LuaLaTeX{Lua\LaTeX}
+
+
+%%% macro borrowed from TUGBoat class %%%
+
+% https://ctan.org/pkg/tugboat
+ 
+\NewDocumentCommand{\cs}{m}{\texorpdfstring
+ {{\tt \char`\\#1}\@}%
+ {\textbackslash #1}%
+ }
+
+%%%%%%%%%  Set up text and math fonts  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[warnings-off={mathtools-colon,mathtools-overbracket},mathbf=sym,mathsf=sym]{unicode-math}
+% Unicode math loads the fontspec package
+
+\setmainfont{texgyreheros}[
+	WordSpace = {1,1.4,1},
+	Extension = .otf,
+	UprightFont = *-regular,
+	ItalicFont = *-italic,
+	BoldFont = *-bold,
+	BoldItalicFont = *-bolditalic,
+	Numbers = Lining,
+	Scale=0.91,% same as for newtx
+			]        
+\setsansfont{texgyreheros}[
+	WordSpace = {1,1.4,1},
+	Extension = .otf,
+	UprightFont = *-regular,
+	ItalicFont = *-italic,
+	BoldFont = *-bold,
+	BoldItalicFont = *-bolditalic,
+	Numbers = Lining,
+	Scale=0.91,% same as for newtx
+			]        
+\setmonofont{Inconsolatazi4}[
+    Scale=1.05,%
+    Extension = .otf,
+    UprightFont = *-Regular,
+    ItalicFont = *-Regular,% has no italic face
+    BoldFont = *-Bold, 
+	BoldItalicFont = *-Bold,% has no bold italic face
+    RawFeature = {+ss01,+ss02,+ss03},
+    ]             
+\setmathfont{STIXTwoMath-Regular}[
+	Scale=MatchUppercase,
+	Extension = .otf,
+%    Color=NavyBlue, 
+	RawFeature = {+ss01, -ss02, -ss08},
+]% ss01 -- switch calligraphic to script; +ss02 -- variants of g, u, v, w, z; +ss08 -- upright integrals
+
+\setmathfontface\mathbf{STIXTwoText-Bold.otf}% to not get text font's sans bold ... could change other text-math faces, if desired
+
+
+%%%%%%%%%%%   Hyperref related   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[psdextra]{hyperref}
+
+\hypersetup{
+	pdfborder={0 0 0},
+	bookmarksnumbered=true,
+	bookmarksopen=true,
+	bookmarksopenlevel=2,
+	colorlinks=true,
+	linkcolor=blue,
+	citecolor=blue,
+	urlcolor=violet,
+	filecolor=red, 
+	anchorcolor=yellow,% not all pdf viewers recognize this field (Firefox does)
+%	colorscheme=phelype,% overrides link, cite, url, file colors with a preset scheme, through \DocumentMetadata
+	pdfpagelayout=SinglePage,
+	pdfdisplaydoctitle=true,
+	pdfstartview=Fit,
+	pdfmetalang={en},
+	pdftitle={Documentation for the MIT thesis template},
+	pdfkeywords={John Lienhard, Massachusetts Institute of Technology, MIT, thesis, dissertation, template, latex},
+	pdfnewwindow=true,
+	pdfauthor={John H. Lienhard},
+	pdfauthortitle={Professor of Mechanical Engineering},
+	pdfcaptionwriter={{John H. Lienhard,  V}}, 
+	pdfurl={https://lienhard.mit.edu},
+	pdfcontactemail={lienhard@mit.edu},
+	pdfcontactaddress={77 Massachusetts Avenue, Room 3-166},
+    pdfcontactcity={Cambridge, MA},
+    pdfcontactpostcode={02139},
+    pdfcontactcountry={USA},
+    pdfcontacturl={https://lienhard.mit.edu},
+    pdfcopyright={Copyright © \the\year\ by John H. Lienhard. Reuse under the MIT license},
+	pdfsubject={Documentation for the MIT thesis class and template},
+	pdflicenseurl={https://ctan.org/license/mit},
+	}
+
+% Directly add the xmp property that shows work is copyrighted. See l3pdfmeta.pdf. 
+% This is not automatic with \DocumentMetadata. "True" must be capitalized. 
+\ExplSyntaxOn
+	  \cs_if_exist:NTF \pdfmeta_xmp_add:n {\pdfmeta_xmp_add:n{<xmpRights:Marked>True</xmpRights:Marked>}}{}
+\ExplSyntaxOff
+	
+\urlstyle{same}% this changes font for \url to the current text font, but it is not recognized by \href.  
+
+
+%%%%%%%%%%  A nomenclature environment  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\providecommand{\nomname}{Nomenclature}  
+\newlength\nomenwidth
+\newlength\savitemsep
+
+\makeatletter
+% nomenclature entries
+\NewDocumentCommand\entry{m m}{%
+    \item[#1\hfill]#2%
+    \@itempenalty=-\@lowpenalty
+}
+\ExplSyntaxOn
+\tagpdfsetup { role/new-tag = { Nomenclature_list/Div  } }
+\tagpdfsetup { role/new-tag = { Nomenclature_entry_heading/Span  } }
+
+% nomenclature subheadings 
+\NewDocumentCommand\EntryHeading{m}{%
+	\itemsep3\p@ plus 1\p@ minus 1\p@
+    \goodbreak\item[\tagstructbegin{tag=Nomenclature_entry_heading}\emph{#1}\tagstructend\hfill]\mbox{}% mbox added for tagged pdf 2023/10/11; 2025/09/23 replace \itshape by \emph for css
+    \setlength{\itemsep}{\savitemsep}\@itempenalty=10000 % increased to 10000, 2025/04/20
+}
+\makeatother
+%
+%   Increase first optional argument to > 2em if wide entries cause undesired misalignment of columns. 
+%   Second optional argument can be used to rename the environment, e.g., to List of Symbols.
+%   Third optional argument selects section-level or chapter-level style for the nomenclature list.
+%   Fourth option argument selects the style of the toc entry (by default, same as #3); the values
+%		frontmatter or backmatter can be used when nomenclature is located with front or back matter. 2025/01/17
+\NewDocumentEnvironment{nomenclature}{O{2em} O{\nomname} O{section} O{#3}}{%
+    \setlength\columnsep{2em}% 
+    \setlength{\nomenwidth}{#1}%
+    \tl_set:Ne \l_tmpa_tl { nomenclature\alph{section} }
+    \tl_set:Ne \l_tmpb_tl {#2}
+    \MakeLinkTarget*{\l_tmpa_tl}\csname #3\endcsname *{\l_tmpb_tl}\addcontentsline{toc}{#4}{#2}%
+    \raggedright
+    \tagstructbegin{tag=Nomenclature_list}
+    \begin{list}{}{%
+         \setlength{\itemsep}{0pt}%
+         \setlength{\parsep}{\itemsep}%
+         \setlength{\labelsep}{1em}%
+         \setlength{\labelwidth}{\nomenwidth}%
+         \setlength{\leftmargin}{\labelwidth}%
+         \addtolength{\leftmargin}{\labelsep}%
+		 \setlength{\savitemsep}{\itemsep}%
+    }%
+}{\end{list}%
+  \tagstructend
+  \ignorespacesafterend}
+
+%	The *-version, nomenclature*, sets the nomenclature in a two-column format.
+%   The user must load the multicol package!
+%	The loading is done *inside* the environment and *before* the list starts so that:
+%	i) the nomenclature heading is not in two-column; ii) the list margins are correct.
+%
+\NewDocumentEnvironment{nomenclature*}{ O{2em} O{\nomname} O{section} O{#3} }{%
+    \setlength\columnsep{2em}% 
+    \setlength{\nomenwidth}{#1}%
+    \tl_set:Ne \l_tmpa_tl { nomenclature\alph{section} }
+    \tl_set:Ne \l_tmpb_tl {#2}
+    \MakeLinkTarget*{\l_tmpa_tl}\csname #3\endcsname *{\l_tmpb_tl}\addcontentsline{toc}{#4}{#2}%
+    \vspace{-\multicolsep}% don't to add to the vertical space already provided by the heading
+	\begin{multicols}{2}%
+    \raggedright
+    \tagstructbegin{tag=Nomenclature_list}
+    \begin{list}{}{%
+         \setlength{\itemsep}{0pt}%
+         \setlength{\parsep}{\itemsep}%
+         \setlength{\labelsep}{1em}%
+         \setlength{\labelwidth}{\nomenwidth}%
+         \setlength{\leftmargin}{\labelwidth}%
+         \addtolength{\leftmargin}{\labelsep}%
+		 \setlength{\savitemsep}{\itemsep}%
+    }%
+}{\end{list}\tagstructend\end{multicols}\ignorespacesafterend}
+\ExplSyntaxOff
+
+
+%%%%%%%%%%%%%%%%   bibliography  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Numerical citations of references
+\usepackage[style=ext-numeric-comp,giveninits=true,maxbibnames=10,sorting=none,language=american]{biblatex}
+
+% and make some changes to that style
+	\renewcommand{\multicitedelim}{\addcomma}% removes space between consecutive cites to give [6,7], not [6, 7]
+    \AtEveryBibitem{%
+      \ifentrytype{article}{%
+        \renewbibmacro{in:}{}% Removes "In:" for articles
+		\renewcommand*{\jourvoldelim}{\addcomma\space}   % put comma after journal title
+		\renewcommand*{\volnumdatedelim}{\addcomma\space}% put comma after volume info
+		\renewbibmacro*{issue+date}{% Print date without parentheses around it
+		\iffieldundef{issue}%
+        	{}%
+        	{\printfield{issue}%
+         	\setunit*{\addcomma\space}
+        	}%
+			\printdate
+		}
+      }{}
+    }
+    %
+	\renewbibmacro*{volume+number+eid}{%
+        \printtext[bold]{\printfield{volume}}% bold volume (issue number) , eid
+        \iffieldundef{number}
+          {} % do nothing
+          {\printtext[parens]{\printfield{number}}} % print number in parentheses
+        \setunit{\bibeidpunct}%
+        \printfield{eid}
+    }
+\addbibresource{mitthesis-doc.bib}
+
+\begin{filecontents*}[overwrite]{mitthesis-doc.bib}
+
+@article{montijano2014,
+  title		= {Numerical Methods With LuaLaTeX},
+  author	= {Juan I. Montijano and Mario P{\'{e}}rez and Luis R{\'{a}}ndez and Juan Luis Varona},
+  year		= 2014,
+  volume	= 35,
+  month		= jan,
+  number	= {1},
+  pages		= {51--56},
+  journal	= {TUGboat},
+  url 		= {https://tug.org/TUGboat/tb35-1/tb109montijano.pdf},
+}
+@manual{latexproject2024ltnews40,
+  author       = {{\LaTeX{} Project Team}},
+  title        = {{\LaTeX{} News}: Issue 40},
+  date         = {2024-11},
+  organization = {\LaTeX{} Project},
+  url          = {https://www.latex-project.org/news/latex2e-news/ltnews40.pdf}
+}
+@article{lienhard2026,
+  author =       {John H. Lienhard},
+  title =        {Modernizing MIT’s Thesis Template: \texttt{mitthesis.cls}},
+  journal =      {TUGboat},
+  volume =       47,
+  number =       2,
+  year =         2026,
+  URL =          {https://tug.org/TUGboat/tb47-2/},
+  note =        {To appear.},
+}
+\end{filecontents*}
+
+
+%%%%%%%%%%%%%   End preamble   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand\abstractname{SUMMARY}
+
+\begin{document}
+
+\begingroup  
+    \centering
+	\ExplSyntaxOn
+        \tag_struct_begin:n { tag=Title, title=Title }
+        \leavevmode
+        \tag_struct_begin:n { tag=Strong }
+        \tag_mc_begin:n { tag=Strong }
+        \LARGE The~MIT~thesis~template
+        \\[1em]
+        \tag_mc_end:
+        \tag_struct_end:
+        \tag_struct_end:
+	\ExplSyntaxOff
+	\leavevmode\large 
+	\tagstructbegin{tag=Strong}\tagmcbegin{tag=Strong}John H. Lienhard\tagmcend\tagstructend \\ 
+	Department of Mechanical Engineering \\ Massachusetts Institute of Technology
+	\\[1em]
+	\daymonthyeardate\\[1em]
+\endgroup
+
+\phantomsection\pdfbookmark[1]{\abstractname}{summary}
+\begin{abstract}
+This \LaTeX{} class formats theses according to the requirements of the MIT Libraries. The template is suitable for MIT theses of all types and at all levels. The title and abstract pages are automatically laid out from information provided by the user. The template includes options for a variety of typefaces, and it is compatible with either \pdfTeX{} or the Unicode-aware engine \LuaLaTeX. When using \LaTeX{} formats dated November 2022 or later, the resulting PDF file meets the PDF/A archivability standard. For formats later than November 2025, the PDF can meet the technical requirements of the PDF/UA-2 accessibility standard.  An up-to-date \href{https://www.tug.org/texlive/}{\TeX{} Live} installation includes all other packages required by the template.  This document provides instructions for installation and use of the template.
+\end{abstract}
+
+\tableofcontents
+
+\section{BACKGROUND}\label{sec:1}
+
+The original MIT Thesis template was written \LaTeX{} 2.09 by Stephen Gildea in the late 1980s (available on CTAN, \href{https://mirrors.ctan.org/obsolete/macros/latex209/contrib/mitthesis/mitthesis.sty}{here}). That template was edited by many later students.
+
+LaTeX has changed greatly since the original MIT thesis template was written. \LaTeX{} 2.09 was replaced by \LaTeXe\ in 1994. New engines were developed, particularly \pdfTeX{} during the 1990s and Unicode-aware engines in the decades that followed. Many packages and fonts were developed to accompany the original platform, particularly after 2000; and major updates to the \LaTeX{} kernel began in 2018. Over the years, the MIT Libraries changed the required format several times, especially as electronic thesis submission became the norm. The original template served MIT well, but by the early 2020s, it was substantially out of date. That situation motivated the creation of a new template. 
+
+This new MIT thesis template was developed in 2023 at the request of the MIT Libraries.  The title and abstract pages strictly follow the current \href{https://libraries.mit.edu/distinctive-collections/thesis-specs/}{requirements of the Libraries}. The underlying code is entirely new, with extensive use of \texttt{expl3} syntax.
+
+\section{SYSTEM REQUIREMENTS AND INSTALLATION}\label{sec:2}
+The new \texttt{mitthesis} class uses the features of \LaTeX{} as of 2022, with limited backward compatibility. An up-to-date \LaTeX{} system is therefore necessary when using this template.  
+
+\LaTeX{} is a free, open source system. The entire system is distributed through the \TeX{} Live platform (\url{https://www.tug.org/texlive/}), including the basic format, packages, and user interfaces.  The system operates on Windows, MacOS, and Unix/Linux. \TeX{} Live is formally updated each year in the spring, and the associated utility package allows users to download the latest versions more frequently if they desire. (At the time of this writing, the commercial platform Overleaf.com provides a similar functionality.)
+
+If you are missing a package or documentation, you may obtain it at no cost from the Comprehensive \TeX{} Archive Network, CTAN (\href{http://ctan.org}{ctan.org}). 
+
+\subsection{Downloading the template}
+The files needed for preparing your thesis are in the CTAN repository: \url{https://ctan.org/pkg/mitthesis}. Copy the subdirectory \texttt{MIT-thesis-template} onto your system. That directory contains files you can adapt for your own thesis. 
+
+If you \TeX{} system has the most current version of \texttt{mitthesis.cls} installed (e.g., you have an up-to-date version of \TeX{} Live), you are all set.  If not, copy the file \texttt{mitthesis.cls} into your working directory. If you plan to use fonts other than the default fonts, ensure that the \texttt{fontsets} subdirectory is present in your working directory.
+
+\subsection{File structure}
+The new MIT thesis template consists of: \texttt{mitthesis.cls}; a root file \texttt{MIT-Thesis.tex}; a file to load the abstract, \texttt{abstract.tex}; a file for design options, \texttt{mydesign.tex}; and an optional file to change the fonts (see the subdirectory, \texttt{fontset}). You should change the name of the root file to something more descriptive of your own work (e.g., \texttt{JohnsThesis.tex}, \texttt{MagnumOpusScientiae.tex},\ldots). In addition, files must be loaded for acknowledgments, an optional biosketch, chapters, optional appendices, and a bibliography.
+
+\subsection{\LaTeX{} engine: \pdfTeX{} or \LuaLaTeX}
+The template works with either the \pdfTeX{} engine or the Unicode-aware \LuaLaTeX{} engine.  
+
+The \pdfTeX{} engine, first released around 1996, uses the older 7- and 8-bit font encodings of \LaTeX{} (fonts of 128 or 256 characters). Separate font files are needed for each style variation (bold, italic, etc.), and because each font holds at most 256 slots, a given encoding covers only a limited character set---typically the Latin script for Western and Central European languages, with other scripts (Cyrillic, Greek) requiring different encodings and fonts. (Font loading is done automatically by \texttt{mitthesis.cls}.)
+
+\LuaLaTeX{} uses the Unicode UTF-8 encoding. UTF-8 maps up to 1,112,064 code points into individual slots, covering many languages and scripts. Unicode math fonts assign a unique code point to each character variation, such as bold, italic, calligraphic, or fraktur. \LuaLaTeX{} is built on the Lua programming language and enables the direct use of Lua code in your \texttt{.tex} files; with Lua, you can automate plotting, table generation, and other numerical computations~\cite{montijano2014}. \LuaLaTeX{} will become the primary \LaTeX{} engine over time~\cite{latexproject2024ltnews40}, and it is required for producing tagged (accessible) PDF documents with \texttt{mitthesis.cls}~\cite{lienhard2026}.
+
+\LuaLaTeX{} is slower than \pdfTeX.  The difference can be noticeable with large documents or on platforms with limited resources.  The \LaTeX{} \verb|\includeonly{..}| command lets you process a single chapter at a time while writing and editing.
+
+\section{SETTING UP TITLE PAGE, ABSTRACT, AND BIBLIOGRAPHY}\label{sec:3}
+Various fields and commands must be changed to your own information in the preamble of \texttt{MIT-Thesis.tex} and immediately after the \verb|\begin{document}| command. This information includes the title, author, degree and other essential information.  With the comments in \texttt{MIT-Thesis.tex}, this step should be self-explanatory. Nevertheless, some explanation follows.
+
+
+%%%%%%%%%%%%%%%%%%%%%  Table  1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tagpdfsetup{table/header-rows={1}}
+\begin{table*}
+\caption{Primary user commands\label{tab:1}}
+\smallskip\setlength\extrarowheight{5pt}%
+\centering{%
+\small
+\begin{tabular}{>{\ttfamily} l <{} >{\raggedright\arraybackslash}p{18em} }
+\toprule
+\textbf{\textrm{Command}} & \textbf{Comments} \\
+\midrule
+\cs{hypersetup}\{{keyword=value,\ldots}\} & metadata for archiving, indexing, discovery, and accessibility \\
+\cs{title}\{{title text}\} & the title \\
+\cs{Author}\{{name}\}\{{department}\}[{first previous degree}][{second\ldots}] & use separately for each author, up to four optional previous degrees \\
+\cs{Degree}\{{degree name}\}\{{department}\} & use separately for each degree and department \\
+\cs{DegreeDate}\{{month}\}\{{year}\} & date when degree is \textit{granted} \\
+\cs{ThesisDate}\{{date}\}  			   & date when thesis is \textit{submitted} \\
+\cs{Supervisor}\{{name}\}\{{title}\}[{department}] & once for each supervisor, add department if using optional committee members page \\
+\cs{Acceptor}\{{name}\}\{{title}\}\{{department}\}  & once for the thesis acceptor of each department \\
+\cs{CClicense}\{{license type}\}\{{license URL}\} & optional creative commons license \\
+\cs{Reader}\{{name}\}\{{title}\}\{{department}\}    & one or more thesis readers, optional \\
+\bottomrule
+\end{tabular}}%
+\end{table*}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Set-up commands} 
+The primary commands are listed in Table~\ref{tab:1}.
+\begin{enumerate}
+\item In the \verb|\hypersetup{..}| command, change the keywords in the sample file to match your own information (name, title, subject, etc.). These commands generate metadata that are incorporated into the PDF file.  
+
+\item \verb|\title{the title of your thesis}|
+
+\item \verb|\Author{author full name}{author department}[1st PREVIOUS degree][2nd...| \linebreak
+Note that the third, fourth, fifth, and sixth arguments are optional [..] and may be omitted.  Use once for each author.\footnote{Most MIT theses have a single author. Joint theses require an approved \hrefurl{https://libraries.mit.edu/distinctive-collections/thesis-specs/\#submit}{petition}.} See \S\ref{sec:7.3} if you are enrolled in more than one department.
+
+\item \verb|\Degree{name of degree}{department giving degree}|. Use once for each degree fulfilled by the thesis. 
+
+If two departments jointly issue a single degree, leave the degree name blank for the \emph{second} degree: 
+\verb|\Degree{}{2nd department name}|.  
+If the thesis satisfies two degrees from one department, leave the department argument blank for 
+the \emph{second} degree: \verb|\Degree{2nd degree name}{}|. 
+
+If you wish to cause a line break in a very long degree name, you can insert \verb|\\| at an appropriate point.
+Department names should not break across lines.  For example:
+\begin{quote}
+\verb|\Degree{Doctor of Philosophy \\ in \\ Electrical Engineering and Computer|\linebreak
+\hbox{}\qquad\verb|Science}{Department of Electrical Engineering and Computer Science}|
+\end{quote}
+
+\item \verb|\Supervisor{supervisor name}{supervisor title}[supervisor department]|. Use once for each supervisor.  The optional supervisor department is required when generating the thesis committee page. See \S\ref{sec:7.3} if your supervisor has more than one title or sits in more than one department.
+
+\item \verb|\Acceptor{acceptor name}{acceptor title}{thesis related position}|. The professor who accepts theses for your department (e.g., the Graduate Officer). Use once for each department. See \S\ref{sec:7.3} if an acceptor has more than one title or sits in more than one department.
+
+\item \verb|\DegreeDate{Month}{year}|. Date degree is awarded (February, May, June, or September).  
+
+\item \verb|\ThesisDate{date}|. Date that your final thesis is submitted to the department.
+
+\item \verb|\Reader{reader name}{reader title}{reader department}|. For thesis committee members other than the supervisor. Using this once will cause the generation of a thesis committee page between the title and abstract pages. See \S\ref{sec:7.3} if a reader has more than one title or sits in more than one department.
+
+\end{enumerate}
+
+\subsection{Copyright license}
+By default, the thesis template reserves all rights for the author, with a carve-out for MIT.  If you wish to make your thesis available under a Creative Commons License, issue the following command between
+\verb|\begin{document}| and \verb|\maketitle|: \verb|\CClicense{license type}{license url}|.  For example,
+
+\begin{verbatim}
+ \CClicense{CC BY-NC-ND 4.0}{https://creativecommons.org/licenses/by-nc-nd/4.0/}
+\end{verbatim}
+\noindent MIT thesis copyright options and policies and Creative Commons licenses are discussed on these links:
+\begin{itemize}[para-vspace=0em,item-vspace=0pt,begin-vspace=5pt]% see latex-lab/blocks-doc.pdf
+\item\url{https://libraries.mit.edu/distinctive-collections/thesis-specs/#owner}
+\item\url{https://creativecommons.org/share-your-work/cclicenses/}
+\end{itemize}
+
+\subsection{Bibliography}
+You may generate your bibliography using either \texttt{biblatex/biber} or \texttt{natbib/bibtex}.  The template is set up for \texttt{biblatex} by default, rather than the older, less flexible \texttt{natbib}.  The \texttt{biblatex} package is very powerful, and you can customize most aspects of the reference list and citations to suit your needs. See the documentation for details: \hrefurl{https://ctan.org/pkg/biblatex}{ctan.org/pkg/biblatex}.
+
+The style of citations and references can be set in your \texttt{.tex} file. For numerical citations of references (e.g., [1]), you can do
+\begin{verbatim}
+\usepackage[style=ext-numeric-comp,giveninits=true,sorting=none,
+     language=american]{biblatex}
+\end{verbatim}
+\noindent For IEEE style citations and references, you might do
+\vskip 5pt
+\verb| \usepackage[style=ieee,maxbibnames=10,sorting=none]{biblatex}|
+\vskip 5pt
+\noindent For author/year style (Smith, 2024), you might do
+\vskip 5pt
+\verb| \usepackage[style=authoryear, maxbibnames=10]{biblatex} |
+\vskip 5pt
+\noindent In the author/year style, \verb|\cite{..}| commands do not automatically produce parentheses. Instead, you can do
+\verb|\parencite{..}| to get ``(Author, year).''
+
+\section{CLASS OPTIONS}
+Class options may be specified for \verb|\documentclass[..]{mitthesis}|. These options are described in Table~\ref{tab:2} and the subsections that follow.
+
+\tagpdfsetup{table/header-rows={1}}
+\begin{table}
+\caption{Options to the document class\label{tab:2}}
+\smallskip\setlength\extrarowheight{3pt}%
+\centering{%
+\small
+\begin{tabular}{>{\ttfamily\raggedright}l<{} >{\raggedright\arraybackslash}p{42em} }
+\toprule
+\textrm{Class option} & Effect \\
+\midrule
+fontset 	& is a keyvalue, \texttt{fontset = <\emph{name}>}, which selects the set of fonts used for the thesis. See description below. \\
+lineno 		& loads  the \texttt{\hrefurl{https://ctan.org/pkg/lineno}{lineno}} package, which provides line numbers, as for editing. The \hrefurl{https://ctan.org/pkg/lineno}{lineno} package  provides additional commands to control line numbering. \\
+mydesign 	& loads the file \texttt{mydesign.tex}, which in turn loads code or packages that change the style of titles, headings, captions, margins, lists, and so on. You may edit \texttt{mydesign.tex} as you prefer or use the option as a key value to load a different file, \texttt{[mydesign=some-file]}\\
+twoside 	& gives facing-page behavior for two-sided printing; omitting it will eliminate the even-numbered blank pages.\\[\jot]
+\bottomrule
+\end{tabular}}%
+\end{table}
+
+\subsection{Font choices}
+By default, \texttt{mitthesis.cls} will load the traditional \LaTeX{} typeface, Computer Modern (for \pdfTeX) or Latin Modern (for Unicode engines).  By using the key value \texttt{fontset=$\cdots$} in the \verb|\documentclass| command, you can select a different set of fonts.  
+
+Eleven font sets are predefined, including the default set (see Table~\ref{tab:3}).  Three work only with \pdfTeX, four work only with \LuaLaTeX, and four work with either.  These options include a mixture of serif or sans-serif text and math fonts, as shown in the table. To access the predefined font sets, you \emph{must} have the directory \texttt{fontsets} as a subdirectory of your working directory, including its files as named. The relevant fonts must also be on your computer; however, all (except Lucida) are included in \TeX{} Live and will be present in a complete \LaTeX{} installation.
+
+Among the predefined font sets, Termes and NewTX are serifed typefaces similar to the digital typeface Times New Roman.  STIX Two is more similar to the original metal-type Times typeface. Libertinus (a fork of Linux Libertine) is a serif typeface inspired by 19\textsuperscript{th}-century book type. Lucida is a serifed typeface designed for high legibility at small sizes or on low-resolution devices. Lucida is excellent for mathematics and includes a complete bold-face math font, but it is not free. Heros and NewTX-sans are sans-serif text typefaces similar to Helvetica. NewTXsf is a sans-serif math font which draws upon glyphs from the STIX fonts. Fira is a humanist sans-serif text typeface designed in conjunction with the Firefox operating system. Finally, Computer Modern (and its extension Latin Modern)---the traditional \LaTeX{} typeface---is a Didone typeface, with high contrast between thick and thin elements.  The \texttt{lmodern} fontset replaces Computer Modern with Latin Modern when running \pdfTeX.
+% STIX Two, Termes, and LMR do not include a separate bold math font.
+
+You may also place your own font-set file, say \texttt{Myfontset.tex}, in your working directory, and load it with:
+\verb|\documentclass[fontset=Myfontset]{mitthesis}|.
+
+\begin{table}[t]
+\caption{Predefined font sets\label{tab:3}}
+\vspace{0.5em}
+\centering{%
+\small
+\tagpdfsetup{table/header-rows={1}}
+\begin{tabular}{>{\ttfamily}l<{}l l p{3em} p{3em} >{\raggedright\arraybackslash}p{19em}@{\hspace*{0.5em}}}
+\toprule
+fontset & \pdfTeX & Unicode & text font & math font & details \\
+\midrule
+fira-newtxsf 	& yes 	& no 	& sans 	& sans 	& included in \TeX{} Live \\
+newtx		 	& yes 	& no 	& serif & serif & included in \TeX{} Live \\
+newtx-sans-text & yes 	& no 	& sans 	& serif & included in \TeX{} Live \\[1em]
+default		 	& yes 	& yes 	& serif & serif & CM \& LM fonts are included in \TeX{} Live \\
+libertinus 		& yes 	& yes 	& serif & serif & included in \TeX{} Live \\
+%in \TeX{} Live for \pdfTeX. For Unicode, OpenType text fonts freely available here 
+%\linebreak \url{https://github.com/alerque/libertinus/releases} \\
+lmodern 		& yes	& yes 	& serif	& serif & included in \TeX{} Live \\
+lucida 			& yes	& yes 	& serif	& serif & the Lucida fonts are available from the \TeX{} Users Group, 
+\url{https://tug.org/store/lucida} \\[2em]
+heros-stix2  	& no 	& yes 	& sans 	& serif & included in \TeX{} Live \\ 
+%\url{http://www.gust.org.pl/projects/e-foundry/tex-gyre} \linebreak\url{https://github.com/stipub/stixfonts} \linebreak  fonts are free \\
+stix2			& no	& yes	& serif	& serif	& included in \TeX{} Live \\ 
+%\url{https://github.com/stipub/stixfonts}, fonts are free\\
+termes			& no	& yes	& serif	& serif	& included in \TeX{} Live \\ 
+%\url{http://www.gust.org.pl/projects/e-foundry/tex-gyre} fonts are free\\
+termes-stix2	& no 	& yes	& serif & serif & included in \TeX{} Live \\
+%\url{http://www.gust.org.pl/projects/e-foundry/tex-gyre} \linebreak\url{https://github.com/stipub/stixfonts}\linebreak fonts are free\\
+%\midrule
+%\multicolumn{5}{l}{Typewriter (monospaced) fonts are also loaded for Unicode} & Inconsolata (sans serif): included in \TeX{} Live 
+%%\url{https://ctan.org/tex-archive/fonts/inconsolata} 
+%Cursor (serif): included in \TeX{} Live \\
+%%\url{http://www.gust.org.pl/projects/e-foundry/tex-gyre} \\
+\bottomrule
+\end{tabular}}%
+\end{table}
+
+\subsection{Design options}
+
+The thesis will follow the default styles of the \LaTeX{} report class for section headings, captions, and lists.  If you prefer different styles you can use the class option [mydesign] which loads the file \texttt{mydesign.tex}. The \texttt{mitthesis} class will insert the content of \texttt{mydesign.tex} at the appropriate point (prior to loading \hrefurl{https://ctan.org/pkg/babel}{babel}, fonts, or \texttt{\hrefurl{https://ctan.org/pkg/hyperref}{hyperref}}). You should not need to edit the class file.
+
+With \texttt{mydesign.tex}, you can set options for a package that manages color, such as \texttt{\hrefurl{https://ctan.org/pkg/xcolor}{xcolor}}. You can change the margins with \verb|\newgeometry{..}| from the \texttt{\hrefurl{https://ctan.org/pkg/geometry}{geometry}} package, say, to create a binding margin for two-sided printing. You can insert any other code to change the design. For instance, you can renew the definition of \verb+\section+ to change fonts, font color, or font features (using commands from the \texttt{fontspec} package with \LuaLaTeX). You can also load other packages.
+
+As distributed, \texttt{mydesign.tex} will set caption labels in boldface type. For example, ``Figure 1.1:'' is made bold. 
+If your \LaTeX{} format is dated 2025/11/01 or later, the code uses \LaTeX's socket and plug mechanism to change the label.
+ If your format is older, the \texttt{\hrefurl{https://ctan.org/pkg/caption}{caption}} package is loaded to change the label.\footnote{As of version 1.22, \texttt{mitthesis.cls} includes its own implementation of \texttt{\textbackslash subfigure} and \texttt{\textbackslash subcaption}, without loading the \texttt{\hrefurl{https://ctan.org/pkg/subcaption}{subcaption}} package.} \LaTeX's hook mechanism can change the style of the caption \textit{text} for recent formats and the \texttt{caption} package can do so for older formats (see \texttt{mydesign.tex}).
+ 
+The class option \texttt{[mydesign]} can also be used as a key value, in the form \texttt{[mydesign=some-file]}, where \texttt{some-file.tex} will be loaded if it is in your working directory. Two examples of design files are in the \texttt{examples} directory. One, \verb+mydesign_redsans_headings+, puts chapter headings, section headings, and caption labels in dark red, sans-serif type. This option pairs well with fontsets like \texttt{newtx} and \texttt{heros-stix2}. The second, \verb+mydesign_libertinus_headings+, uses stylistic alternate characters and ligatures in chapter titles and section headings, and it puts caption labels in bold type. This style runs only with the \texttt{libertinus} fontset; by editing this file, you can restrict the use of alternates to chapter titles to provide a more restrained design.  These are simply examples, not official MIT styles.
+
+Hyperlink colors and PDF bookmark or viewing options from the \texttt{hyperref} package can be changed by using \verb|\hypersetup{ .. }| in the preamble or using \verb|\AtBeginDocument{ \hypersetup{ .. } }| in the \texttt{mydesign.tex} file.
+
+\subsection{Single-sided vs.\ two-sided layout}
+The sample template uses the option \texttt{[twosided]}, which starts major sections (abstract, table of contents, chapters, etc.) on odd-numbered pages.  This arrangement is suitable for two-sided printing, but can lead to empty even-numbered pages. If you do not wish to have this behavior, omit that option.  By default, even and odd page margins are the same; this can be changed in \texttt{mydesign.tex} if necessary.
+
+\subsection{Additional commands}
+The class also provides \verb|\DegreeYear|, \verb|\DegreeMonth|, and \verb|\CopyrightAuthor|. The latter combines all author names into a single token list, e.g., ``Joseph O. Hirschfelder, Charles F. Curtiss, and R. Byron Bird''; a period at the end of the final name (e.g., as in ``John F. Nash Jr.'') is removed.
+
+\subsection{Nomenclature}
+An optional nomenclature environment is provided by the class.  This environment can support either chapter-by-chapter nomenclature (at the section level) or a single nomenclature for the entire thesis (at the chapter level). The environment has four optional arguments: [1] adjust space between symbol and definition (default is 2 em); [2] title of the nomenclature list (default is ``Nomenclature''); [3] level, which can be ``chapter'' or ``section'' depending on whether you
+have one nomenclature list for the whole thesis or one for each chapter (the default is section); and [4] the style of the entry in the table of contents, which can be given as ``frontmatter'' or ``backmatter'' if you are using a single nomenclature for the whole thesis (default is to match [3]).  
+
+A single-column nomenclature list is produced by \verb|\begin{nomenclature}|. A two-column nomenclature list is produced by \verb|\begin{nomenclature*}|, provided that \verb|\usepackage{multicol}| is added to your preamble.
+
+For example, with \verb+\usepackage{multicol}+ in the preamble, the following code 
+{\small
+\begin{center}
+\begin{minipage}{0.85\textwidth}
+\begin{verbatim}
+\begin{nomenclature*}[2em][Nomenclature for Section 4][subsection]
+\EntryHeading{Roman letters}
+\entry{$\symcal{C}$}{material curve}
+\entry{$\symbfup{r}$}{material position [m]}
+\entry{$\symbfup{u}$}{velocity [m $\cramped{\textsf{s}^{-1}}$]}
+\EntryHeading{Greek letters}
+\entry{$\Gamma$}{circulation [$\cramped{\textsf{m}^2}$ $\cramped{\textsf{s}^{-1}}$]}
+\entry{$\rho$}{mass density [kg $\cramped{\textsf{m}^{-3}}$]}
+\entry{$\symbfup{\omega}$}{vorticity $[\cramped{\textsf{s}^{-1}}$]}
+\end{nomenclature*}
+\end{verbatim}
+\end{minipage}
+\end{center}
+}
+produces the two-column nomenclature list below:\footnote{The command \texttt{\textbackslash cramped} is from the \texttt{mathtools} package; it sets the superscript slightly lower. The command \texttt{\textbackslash symbfup} is from the \texttt{Unicode-math} package, which is automatically loaded when running LuaLaTeX; in pdfTeX, use \texttt{\textbackslash bm\{\textbackslash omega\}} instead.}
+
+\begin{nomenclature*}[2em][Nomenclature for Section \arabic{section}][subsection]
+\EntryHeading{Roman letters}
+\entry{$\symcal{C}$}{material curve}
+\entry{$\symbfup{r}$}{material position [m]}
+\entry{$\symbfup{u}$}{velocity [m $\cramped{\textsf{s}^{-1}}$]}
+\EntryHeading{Greek letters}
+\entry{$\Gamma$}{circulation [$\cramped{\textsf{m}^2}$ $\cramped{\textsf{s}^{-1}}$]}
+\entry{$\rho$}{mass density [kg $\cramped{\textsf{m}^{-3}}$]}
+\entry{$\symbfup{\omega}$}{vorticity $[\cramped{\textsf{s}^{-1}}$]}
+\end{nomenclature*}
+
+
+\section{PACKAGES FOR MATH, CHEMISTRY, CODE, TABLES, AND MORE}
+
+The \texttt{mitthesis} class loads the \texttt{amsmath} package and its extension \texttt{mathtools}. These packages provide many useful macros for typesetting equations and symbols, such as: environments for aligning and splitting equations or groups of equations; tools for matrices; a wide variety of operators and symbols; tools to define new math operators and paired delimiters; and much, much more. If you are including equations, look at the documentation for these packages: \url{https://ctan.org/pkg/amsmath} and \url{https://ctan.org/pkg/mathtools}.\looseness=1
+
+Specialized packages for many disciplines---including \hrefurl{https://ctan.org/topic/chemistry}{chemistry}, \hrefurl{https://ctan.org/topic/linguistic}{linguistics}, and \hrefurl{https://ctan.org/topic/physics}{physics}---are available from \hrefurl{https://ctan.org}{CTAN}. For example, the sample Appendix~B uses the \hrefurl{https://ctan.org/pkg/mhchem}{mhchem} package to set chemical equations and the \hrefurl{https://ctan.org/pkg/listings}{listings} package to lay out computer code.
+
+Several packages can improve table formatting.  The \hrefurl{https://ctan.org/pkg/booktabs}{\texttt{booktabs}} package, used in the sample thesis template, produces better quality horizontal lines (called \emph{rules}) for separating material in tables.  The \hrefurl{https://ctan.org/pkg/array}{array} package (also used) provides additional options for column formats in tabular environments. The \hrefurl{https://ctan.org/pkg/dcolumn}{dcolumn} package (also used) aligns columns of numbers on the decimal separator. For multipage tables, the \hrefurl{https://ctan.org/pkg/longtable}{longtable} package (also used) provides automatic page breaking with headings on each page.
+
+When selecting a package, check that it is currently maintained (with relatively recent updates), and compare it to other packages that perform similar functions.  Some packages are better than others, and some obsolete packages remain available online.
+
+The packages called by \texttt{mitthesis.cls} are listed in Table~\ref{tab:4}, and packages loaded in the \texttt{.tex} files are listed in Table~\ref{tab:5}.
+
+\begin{table}
+\caption{External packages loaded by \texttt{mitthesis.cls}. For documentation, visit CTAN, \url{https://ctan.org}.  Or, if you have \hrefurl{https://www.tug.org/texlive/}{\TeX{} Live} installed, you can open a terminal window and type \texttt{\%\  texdoc package-name}.\label{tab:4}}\vspace{1em}
+\centering{\small%
+\setlength\extrarowheight{3pt}
+\tagpdfsetup{table/header-rows={1}}
+\begin{tabular*}{\textwidth}{>{\ttfamily}l<{}@{\extracolsep{\fill}}p{18em} p{22em} }
+\toprule
+Package & Purpose in class file & How it can be used\\
+\midrule
+bookmark & manages PDF bookmarks (loaded by \verb+\DocumentMetadata+) & customize PDF bookmarks \\
+doi		 & support for hyperlinking DOIs		&  hyperlink a doi number: \verb|\doi{..}| \\
+etoolbox & extend or modify other macros  		&  can use in preamble to modify macros, if needed \\
+geometry & set page size and margins			&  can use \verb|\newgeometry| in \texttt{mydesign.tex} to change margins\\
+graphicsx& support for inserting images			&  use to include graphics\\
+hyperref & support for hyperlinks and metadata  &  add metadata for thesis in preamble\\
+mathtools& loads and extends \texttt{amsmath} 	&  \textbf{adds many useful math macros.}  See documentation for \texttt{amsmath} and \texttt{mathtools} \\
+\midrule
+% hyperxmp & fallback if no \verb|\DocumentMetadata{..}|&  ---\\
+kvoptions&  key value management; loads as fallback for systems older than 2022/11/01 & ---\\
+% xparse	 & for systems older than 2020/10/01 & macros to define new commands\\
+lineno	 & class option to add line numbers	& class option \texttt{lineno} will give line numbers; the \texttt{lineno} package adds commands to control numbering\\
+\midrule
+bm		     & enable bold math symbols with \pdfTeX  & command \verb|\bm{..}| produces a bold math symbol \\
+fontenc	     & managed font encoding with \pdfTeX     & additional encodings can be set for non-Latin fonts in a fontset file \\
+fontspec     & required for text font management with \LuaLaTeX{} (\texttt{Unicode-math} loads \texttt{fontspec} by default) & use to load additional Unicode text fonts \\
+unicode-math & required for math font management with \LuaLaTeX{} & choose math symbols, e.g.\ \verb|\symbfit{\Gamma}| for $\symbfit{\Gamma}$; load/alter math fonts in a fontset file \\
+xcolor	     & support for colors, including colored fonts 		& \verb|\textcolor{color}{text}|, \verb|\color{color name}|\\[0.7em]
+%\midrule
+% caption    & could also be loaded in \texttt{mydesign.tex} 		& support for caption styling \\
+% subcaption & could also be loaded in \texttt{mydesign.tex}		& support for subfigures within figures \\
+\bottomrule
+\end{tabular*}}%
+\end{table}
+
+
+\begin{table}
+\caption{External packages that load outside the class file.\label{tab:5}}\vspace{1em}
+\centering{\small%
+\setlength\extrarowheight{3pt}
+\tagpdfsetup{table/header-rows={1}}
+\begin{tabular*}{\textwidth}{>{\ttfamily}l<{}@{\extracolsep{\fill}}p{40em} }
+\toprule
+Package & How it can be used\\
+\midrule
+biblatex   & bibliography loading and formatting. Change to \texttt{natbib} if you prefer\\
+microtype  & typographical refinements: character protrusion, font expansion, letter spacing, etc. \\
+multicol   & environment for multiple text columns; required with two-column nomenclature list \\
+\midrule
+array	   &  additional options for formatting table columns \\
+booktabs   &  publication quality tables, with better horizontal lines and additional commands \\
+dcolumn    &  align columns of numbers on selectable separator (e.g., decimal point) \\
+longtable  &  automatically formats multipage tables with page breaking and headings \\
+rotating   &  rotate material, create sideways figures and tables \\
+\midrule
+babel	   &  if you use multiple languages, load \texttt{babel} in a fontset file before loading fonts \\
+lipsum     &  create filler text (see sample template, Chapter~1) \\
+listings   &  for listing computer code (see sample template, Appendix~B) \\
+mhchem     &  to format chemical formul\ae\ (see sample template, Appendix~B) \\
+setspace   &  can be loaded to change the default line spacing, if desired (e.g., for ``double-spacing'')\\
+\bottomrule
+\end{tabular*}}%
+\end{table}
+
+\section{PDF/A COMPLIANCE, PDF ACCESSIBILITY, AND HTML CONVERSION}
+
+PDF/A-2b compliance is automatic if the following command is issued before the \verb|\documentclass{..}| command:
+\begin{verbatim}
+       \DocumentMetadata{
+         pdfstandard = a-2b, 
+         pdfversion=1.7, 
+         lang = en-US,% default
+       } 
+\end{verbatim} 
+
+Recent \LaTeX{} formats (November 2025 and later) have implemented \emph{tagged} PDF. Depending upon the packages loaded, the MIT Thesis template run with the \LuaLaTeX{} engine can produce ``well-tagged PDF'' that meets the technical requirements of the PDF/UA-2 and PDF/A-4F standards.  In this case, use: 
+\begin{verbatim}
+       \DocumentMetadata{
+         pdfstandard = { ua-2 , a-4f }, 
+         tagging = on,
+         tagging-setup={math/setup=mathml-SE},
+         pdfversion=2.0,% default
+         lang = en-US,%   default
+       } 
+\end{verbatim}
+
+PDF standards compliance can be tested at \hrefurl{https://demo.verapdf.org}{demo.verapdf.org}. Most of the files in the \hrefurl{https://ctan.org/tex-archive/macros/latex/contrib/mitthesis/examples}{examples} directory are PDF/UA-2 compliant (the ones that aren't were generated with \pdfTeX{} owing to font limitations).
+
+\subsection{Accessibility, PDF tagging, and archivability}
+Tagging is necessary for accessibility: a tagged {PDF} embeds structural and semantic information, along with metadata, that enable screen readers to interpret the document. In the US, new federal accessibility requirements broadly mandate that online PDF files meet the accessibility standard WCAG~2.1~AA.  For text documents, the technical requirements of PDF/UA-1 meet the technical requirements for WCAG 2.1~AA, but for math-heavy documents, like many MIT theses, PDF/UA-2 is necessary~\cite{lienhard2026}.\footnote{Many aspects of the accessibility standards cannot be evaluated by machine and require human review. For instance, is the text of a hyperlink descriptive of the link target or is color alone being used to convey meaning?}
+
+In addition to accessibility standards, long-term preservation requires meeting the A-4 or A-4F archivability standards to ensure that fonts are embedded with Unicode mappings and that functional and visual features are preserved. 
+
+Standards compliance can depend on your fonts and figures: fonts must have Unicode mappings and PDF figures must be compliant. Not all \LaTeX{} packages have been upgraded for tagging compliance. In particular, the \texttt{listings} and \texttt{mhchem} packages, used in \texttt{appendixb.tex}, are not compatible with tagged PDF as of July 2026, and they can cause compilation errors if tagging is on.\footnote{A list of tagging-compatible \LaTeX{} packages is at \url{https://latex3.github.io/tagging-project/tagging-status/}.}
+
+\paragraph{Images and alt text.} Accessibility standards require that alt text (alternative text) be included with graphics: 
+\begin{verbatim}
+       \includegraphics*[ alt={describe image in words} ]{image.png}
+\end{verbatim}
+To assist readers who cannot see the graphics, the alt text should describe the content of the figure in words. The caption is already available, so \texttt{alt} text that repeats the caption is redundant. Similarly, it's not helpful to use \texttt{alt} text like ``This is an image.''  The \texttt{alt} text should not rely on color to convey meaning, and it should be sufficiently concise to avoid cognitive overload.
+
+
+\subsection{HTML (web) rendering of tagged PDF}
+Tagged PDF files can be rendered accurately as HTML files, as used by web browsers.  See, for example, \hrefurl{https://ngpdf.com}{ngpdf.com}. As of v1.21, a style sheet (CSS) can be embedded in the MIT Thesis PDF to control web presentation (\texttt{mitthesis-style.css}).  This feature enables a thesis in tagged PDF to be converted to a well-formatted web page.
+
+If HTML conversion is expected, authors should be aware that web conversion may downgrade image quality. For example, vector graphics in PDF format are resolution-independent and scale without loss; but PDF is not a native web image format, like \texttt{.png} or \texttt{.jpg}.  When files containing PDF images are converted to HTML, the images may be rasterized, with a potentially significant loss of resolution and detail. For technical drawings, the labels, data symbols, and annotations can become illegible. 
+ 
+
+\section{TROUBLESHOOTING AND MODIFICATIONS}
+
+\subsection{Listing thesis committee members or using a signature page}
+Listing committee members (with or without signatures) is not required under MIT's thesis specifications. Only the thesis supervisor should appear on the title page, not a list of committee members.  However, some departments may require a separate committee or signature page. Check with your department about this page and any associated formatting requirements. 
+
+If a \verb|\Reader{..}| command is used (see \S\ref{sec:3}), a committee members page will be automatically generated.  Alternatively, you may create your own page and insert it between the title and abstract pages.
+
+
+\subsection{People in multiple departments or with multiple titles}\label{sec:7.3}
+When a student is in multiple departments or a thesis supervisor, acceptor, or reader has multiple titles, you can obtain a line break with proper horizontal spacing by doing
+	\vskip 5pt
+	\quad\verb|\Author{name}{first department and \\ & second department}|
+	
+	\quad\verb|\Supervisor{name}{first title and \\ & second title}|
+	\vskip 5pt
+\noindent The same trick works in the \verb|\Acceptor| command and for permutations of these multiplicities.
+\textbf{\TeX{} hacker's note:} The signature block is typeset as a \LaTeX{} \texttt{tabular} environment as of version 1.18.
+
+
+\subsection{Adding text to title page when required by your program}
+A few programs ask students to add a line of text to the degree section of the title page.  For example, the Leaders for Global Operations (LGO) program requests the addition of ``in conjunction with the Leaders for Global Operations program.''  For LGO, this text is added automatically if you include \verb|\LGO| in the preamble of your thesis.  For other programs, you can use
+	\vskip 5pt
+	\quad\verb|\TitlePageProgramNote{text for your program}|
+	\vskip 5pt
+\textit{Do not} add text unless your program has approval for the addition from the MIT Libraries; otherwise, your thesis may not be accepted.
+
+
+\subsection{Overflowing title page: managing space} If your title page overflows the vertical space (from too many authors, degrees, previous degrees, etc.), you can use some or all of the following techniques. The commands must be given before \verb|\maketitle|.
+\begin{enumerate}
+ \item Reduce the 12 pt and 18 pt skips between the various blocks of text to 6 pt with this command:
+	\vskip 5pt
+	\noindent\verb|\Tighten|
+ \item Reduce the font size in the signature block with this command:
+	\vskip 5pt
+	\noindent\verb|\SignatureBlockSize{\small}| 
+ \item Put the acceptor name and title onto two lines, rather than three, by putting the acceptor's position into the second argument and leaving the third argument blank:
+	\vskip 5pt
+	{\small\noindent\verb|\Acceptor{Tertius Castor}{Professor and Graduate Officer, Department of Research}{}|}
+ \item Reduce the font size of the author name[s] from \verb|\large| to \verb|\normalsize| with this command:
+	\vskip 5pt
+	\noindent\verb|\AuthorNameSize{\normalsize}|
+ \item Omit previous degrees from the title page, instead mentioning them in the biographical sketch.
+\end{enumerate}
+
+
+\subsection{Push title page text toward top} If you prefer to keep the text toward the top of the title page with most white space at the bottom, you
+can use this command to squash the vertical glue (\TeX's stretchy space):
+	\vskip 5pt
+	\quad\verb|\Squash| 
+	\vskip 5pt
+\noindent This command is useful when the text has not already reached the bottom of the page, since the glue gets squashed automatically when the page is full. This command must be given before \verb|\maketitle|.
+
+\subsection{Overflowing thesis committee members page: managing space}
+Reduce the skips at the top of the committee members page from 56~pt to 32~pt with this command:
+	\vskip 5pt
+	\verb|\CMPShortenTop|
+	\vskip 5pt
+	
+\noindent This command must be given before \verb|\maketitle|.
+
+\subsection{Changing paragraph separation}
+If you prefer to denote paragraph breaks by vertical space rather than indentation, you can try the \texttt{parskip} package: \hrefurl{https://ctan.org/pkg/parskip}{ctan.org/pkg/parskip}. See that package's documentation for details.
+
+\subsection{Use outside MIT}
+To adapt this template for use at a different institution, or for specific departmental needs, you can put the following commands in your preamble.  
+\begin{itemize}
+\item Use \verb|\Institution{Your Institution}| to change MIT to your own institution on the title page.
+
+\item Use \verb|\maketitle*| (in place of \verb|\maketitle|) to drop the MIT copyright permission statement.
+
+\item If your institution issues degrees in months other than February, May, June, or September, you can still put those months into the 
+\verb|\DegreeDate| command. To suppress the resulting error message, put \verb|\SuppressMonthError| before \verb|\maketitle*|. 
+
+\item Omitting \verb|\Acceptor| commands will drop the ``Accepted by:'' field. To suppress the resultant error message, put \verb|\SuppressAcceptorError| before \verb|\maketitle*|.
+
+\item To change ``Thesis Supervisor'' to something else, use \verb|\SupervisorDesignation{..}|.
+\item To change ``Thesis Committee''  to something else, use \verb|\ThesisCommitteeName{..}|.
+\item To change ``Thesis Reader''  to something else, use \verb|\ThesisReaderName{..}|.
+
+\end{itemize}
+\emph{Please do not remove the license/copyright text from the source files --- this code took me some time to write!}
+
+\section[RESOURCES FOR LEARNING LATEX]{RESOURCES FOR LEARNING \LaTeX}
+\LaTeX{} documentation is easy to find online. A few useful resources, among many, are these:
+\begin{description}
+\item[\LaTeX{} Wikibook.] \url{https://en.wikibooks.org/wiki/LaTeX}. An online tutorial book.
+\item[\LaTeX 2e: An unofficial reference manual.] \url{https://latexref.xyz/dev/latex2e.html}. A comprehensive explanation of each \LaTeX{} command by Karl Berry. 
+\item[\TeX{} Stack Exchange.]\ \url{https://tex.stackexchange.com/}. More than 250,000 answered questions, and you can ask your own!
+\item[Generative AI systems.] At the time of this writing, AI models can sometimes answer \LaTeX-related questions accurately or write acceptable \LaTeX{} and expl3 code. This landscape is changing rapidly, but at present you should be cautious about AI-generated code.
+\end{description}
+
+\vskip 30pt
+
+\centering{\textcolor{Red3}{\Large\textbf{\emph{Good luck with your thesis and your thesis defense!}}}}
+
+\vskip 30pt
+
+\defbibheading{bibintoc}{\section*{#1}\addcontentsline{toc}{section}{\protect\numberline{}\itshape\refname}} 
+\printbibliography[title={\refname},heading=bibintoc]
+
+
+\end{document}

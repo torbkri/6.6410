@@ -1,0 +1,275 @@
+%--------------------
+% Packages
+% -------------------
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+%\usepackage{gentium}
+\usepackage{mathptmx} % Use Times Font
+
+\usepackage{braket}
+\usepackage{amsmath}
+\usepackage{pgf}
+\usepackage{xcolor}
+\usepackage{graphicx} % Required for including pictures
+\usepackage[swedish]{babel} % Swedish translations
+\usepackage[pdftex,linkcolor=black,pdfborder={0 0 0}]{hyperref} % Format links for pdf
+\usepackage{calc} % To reset the counter in the document after title page
+\usepackage{enumitem} % Includes lists
+
+\frenchspacing % No double spacing between sentences
+\linespread{1.2} % Set linespace
+\usepackage[a4paper, lmargin=0.1\paperwidth, rmargin=0.1\paperwidth, tmargin=0.1\paperheight, bmargin=0.1\paperheight]{geometry} %margins
+%\usepackage{parskip}
+
+\usepackage[all]{nowidow} % Tries to remove widows
+\usepackage[protrusion=true,expansion=true]{microtype} % Improves typography, load after fontpackage is selected
+
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+
+
+
+%-----------------------
+% Set pdf information and add title, fill in the fields
+%-----------------------
+\hypersetup{ 	
+pdfsubject = {ECON2110},
+pdftitle = {Problem Set 2},
+pdfauthor = {Torbjoern S Kringeland}
+}
+
+%-----------------------
+% Begin document
+%-----------------------
+\begin{document} %All text i dokumentet hamnar mellan dessa taggar, allt ovanför är formatering av dokumentet
+\title{Problem set 1}
+\section*{Problem 1}
+\subsection*{a)}
+We consider the state with basis $\ket{0}, \ket{1},\dots ,\ket{d-1}$, and have another orthonormal basis $\ket{v_0}, \ket{v_1}, \dots , \ket{v_{d-1}}$. To show that there is a unitary transformation $U$ such that $U\ket{i}=\ket{v_i}$ we start with an operator $\ket{v_i}\bra{i}$ and check how it acts on a vector $\ket{j}$.
+
+\begin{equation}
+    \left(\ket{v_i}\bra{i}\right) \ket{j} = \ket{v_i} \braket{i|j} = \braket{i|j}\ket{v_i} = \delta_{ij}\ket{v_i} 
+\end{equation}
+This gives that the operator $\ket{v_i}\bra{i}$ will return the vector $\ket{v_i}$ when applied to $\ket{i}$ and $0$ otherwise. Taking advantage of this attribute, we construct the transformation by taking 
+\begin{equation}
+    U = \sum_{i=0}^{d-1}\ket{v_i}\bra{i}
+\end{equation}
+To show that $U$ is a unitary operator we check 
+\begin{equation*}
+    UU^\dagger = \sum_{i=0}^{d-1}\ket{v_i}\bra{i}\sum_{j=0}^{d-1}\ket{j}\bra{v_j} = 
+    \sum_{i,j=0}^{d-1}\ket{v_i}\braket{i|j}\bra{v_j} = 
+    \sum_{i,j=0}^{d-1}\ket{v_i}\delta_{ij}\bra{v_j} = 
+    \sum_{i=0}^{d-1}\ket{v_i}\bra{v_i} = I
+\end{equation*}
+\subsection*{b)}
+We see what the operator does to an arbitrary vector of the basis: $\sum_{i=0}^{d-1}c_{i}\ket{v_i}$
+\begin{equation}
+    \sum_{i=0}^{d-1}\ket{v_i}\bra{v_i}\sum_{j=0}^{d-1}c_{j}\ket{v_j} = 
+    \sum_{i=0}^{d-1}\sum_{j=0}^{d-1}c_{j}\ket{v_i}\braket{v_i|v_j} = 
+    \sum_{i=0}^{d-1}\sum_{j=0}^{d-1}\delta_{ij}c_i\ket{v_i} = 
+    \sum_{i=0}^{d-1}c_{i}\ket{v_i}\bra{v_i}
+\end{equation}
+i.e 
+\begin{equation}
+    \sum_{i=0}^{d-1}\ket{v_i}\bra{v_i} = I
+\end{equation}
+
+\section*{Problem 2}
+\subsection*{a)}
+Show that the matrix $U$ is unitary, i.e. $U^\dagger U = I$
+\begin{equation}
+    U = \frac{1}{\sqrt{2}}
+    \left(
+    \begin{matrix}
+        1&i \\
+        1&-i
+    \end{matrix}
+    \right)
+\end{equation}
+
+\begin{equation}
+    U^\dagger = \frac{1}{\sqrt{2}}
+    \left(
+    \begin{matrix}
+        1 & 1 \\
+        -i & i
+    \end{matrix}
+    \right)
+\end{equation}
+
+\begin{equation}
+    U^\dagger U = UU^\dagger = \frac{1}{\sqrt{2}}
+    \left(
+        \begin{matrix}
+            1*1 + i*\left(-i\right) & 1*1 + i*i \\ 
+            1*1 + \left(-i\right)*\left(-i\right) & 1*1 + i*\left(-i\right)
+        \end{matrix}
+    \right)
+     = I
+\end{equation}
+
+\subsection*{b)}
+How U acts upon the states: 
+$\ket{0}, \ket{1}, \ket{+}, \ket{-}, \ket{+i} and \ket{-i}$
+we get:
+
+
+\begin{equation}
+    U\ket{0} = \frac{1}{\sqrt{2}}
+    \left(
+        \begin{matrix}
+            1\\1
+        \end{matrix}
+        \right)
+        = \ket{+}
+    \end{equation}
+    
+    \begin{equation}
+        U\ket{1} = \frac{1}{\sqrt{2}}
+        \left(
+            \begin{matrix}
+                i\\-i
+            \end{matrix}
+            \right)
+            =i\ket{-}\sim\ket{-}
+        \end{equation}
+        
+\textcolor{red}{$\ket{+} and \ket{-}$ is wrong?}
+
+\begin{equation}
+    U\ket{+} = \frac{1}{2}
+    \left(
+        \begin{matrix}
+            1+i\\1-i
+        \end{matrix}
+    \right)
+    =\ket{+i}
+\end{equation}
+\begin{equation}
+    U\ket{-} = \frac{1}{2}
+    \left(
+        \begin{matrix}
+            1-i\\1+i
+        \end{matrix}
+    \right) 
+    = \ket{+1}\ket{-i}
+\end{equation}
+
+\begin{equation}
+    U\ket{+i} = \frac{1}{2}
+    \left(
+        \begin{matrix}
+            2\\0
+        \end{matrix}
+    \right)
+    =
+    \left(
+        \begin{matrix}
+            1\\0
+        \end{matrix}
+    \right)
+    = \ket{0}
+\end{equation}
+
+\begin{equation}
+    U\ket{-i} = \frac{1}{2}
+    \left(
+        \begin{matrix}
+            0\\2
+        \end{matrix}
+    \right)
+    =
+    \left(
+        \begin{matrix}
+            0\\1
+        \end{matrix}
+    \right)
+    \ket{1}
+\end{equation}
+We see that the unitary operator $U$ transforms $\ket{0}\rightarrow \ket{+}, \ket{+}\rightarrow\ket{i}, \ket{i}\rightarrow \ket{0}$, i.e. z$\rightarrow$ x, x$\rightarrow$ y, y$\rightarrow$ z
+
+\subsection*{c)}
+$U$ acts on the bloch sphere with a $120^\circ$ rotation around the $\left(1,1,1\right)$.
+
+\section*{Problem 3}
+Let $\ket{0}, \ket{1},\ket{2}$ be a basis for the system.
+\subsection*{a)}
+Firstly we need to check the unit length of the basis.
+Using the characteristic $\braket{x_i|x_j} = \delta_{ij},\forall\, x_{i,j} \in \ket{0},\ket{1},\ket{2}$ we get the following inner products:
+\begin{equation}
+    \braket{a|a} = \frac{1}{2}\braket{0|0} + \frac{1}{4}\braket{1|1} + \frac{1}{4}\braket{2|2} = \frac{1}{2} + \frac{1}{4} + \frac{1}{4} = 1
+\end{equation}
+\begin{equation}
+    \braket{b|b} = \frac{1}{2}\braket{0|0} + \frac{1}{4}\braket{1|1} + \frac{1}{4}\braket{2|2} = \frac{1}{2} + \frac{1}{4} + \frac{1}{4} = 1
+\end{equation}
+\begin{equation}
+    \braket{c|c} =  \frac{1}{2}\braket{1|1} + \frac{1}{2}\braket{2|2} = \frac{1}{2} + \frac{1}{2} = 1
+\end{equation}
+There can only exist three(3) orthonormal vectors in a three dimentional space, so we test inner products.
+\begin{equation}
+    \braket{a|b} = \frac{1}{2}\braket{0|0} - \frac{1}{4}\braket{1|1} - \frac{1}{4}\braket{2|2} = \frac{1}{2} - \frac{1}{4}-\frac{1}{4} = 0
+\end{equation}
+
+\begin{equation}
+    \braket{b|c} = -\frac{\sqrt{2}-1}{2}\braket{1|1} + \frac{\sqrt{2}-1}{2}\braket{2|2} = -\frac{\sqrt{2}-1}{2}+\frac{\sqrt{2}-1}{2} = 0
+\end{equation}
+
+\begin{equation}
+    \braket{a|c} = \frac{\sqrt{2}-1}{2}\braket{1|1} - \frac{\sqrt{2}-1}{2}\braket{2|2} = \frac{\sqrt{2}-1}{2}-\frac{\sqrt{2}-1}{2} = 0
+\end{equation}
+i.e. $\ket{a},\ket{b},\ket{c}$ is an orthonormal basis.
+
+\subsection*{b)}
+The von neumann method of measurement is using a self-adjoint operator named an "obeservable" to conduct the measurement. 
+We take the projection of the state onto the basis:
+\begin{equation}
+    \braket{\psi|a} = \frac{1}{\sqrt{6}}\braket{0|0} + \frac{1}{\sqrt{6}}\braket{1|1}
+\end{equation}
+
+\begin{equation}
+    \braket{\psi|b} = \frac{1}{\sqrt{6}}\braket{0|0} - \frac{1}{\sqrt{6}}\braket{1|1}
+\end{equation}
+
+\begin{equation}
+    \braket{\psi|c} = \frac{2}{\sqrt{6}}\braket{1|1}
+\end{equation}
+I.e. we get probability $\frac{1}{3}$ of being in $\ket{a}$, $\frac{1}{3}$ for $\ket{b}$ and $\frac{1}{3}$ of being in state $\ket{c}$.
+
+For measurement of $\ket{a},\ket{b} $ and $ \ket{c}$ the state collapses to subsequantly $\ket{a},\ket{b} $ and $ \ket{c}$
+
+\textcolor{red}{What are the resulting states?}
+
+\section*{Problem 4}
+\subsection*{a)}
+Probability of transmission through a polarizer is given by Malus' law: $P = \cos^2\left(\Delta\theta\right)$
+If we assume completely unpolarixed light before the first filter, photons must rotate by 45 degrees three$\left(3\right)$ times.  the ammount of light passing through will be $\cos^2\left(45^\circ\right) \cdot \cos^2\left(45^\circ\right) \cdot \cos^2\left(45^\circ\right) = \frac{1}{8}$
+\subsection*{b)}
+For the next setup, we have two options: $\left[1\right]:~0^\circ\rightarrow30^\circ\rightarrow45^\circ\rightarrow60^\circ\rightarrow90^\circ$ or $\left[2\right]:~0^\circ\rightarrow60^\circ\rightarrow45^\circ\rightarrow30^\circ\rightarrow90^\circ$.\\
+First we check option [1]:
+\begin{equation*}
+    P = \frac{1}{2} \cdot \cos^2 \left(30^\circ\right)
+                    \cdot \cos^2 \left(15^\circ\right)
+                    \cdot \cos^2 \left(15^\circ\right)
+                    \cdot \cos^2 \left(30^\circ\right)
+      \approx  0.245
+\end{equation*}
+and option [2]:
+\begin{equation*}
+    P = \frac{1}{2} \cdot \cos^2 \left(60^\circ\right)
+                    \cdot \cos^2 \left(15^\circ\right)
+                    \cdot \cos^2 \left(15^\circ\right)
+                    \cdot \cos^2 \left(60^\circ\right)
+      \approx 0.027 
+\end{equation*}
+So option [1] will let substantially more light through. 
+
+\section*{Problem 5}
+\subsection*{a)}
+if the filter gives $25\%$ regardles of orientation, we know that $\cos^2 \left(\Delta \theta\right) \cdot\cos^2 \left(\frac{\pi}{2} - \Delta \theta\right) = \frac{1}{4}$ 
+The first component of each object is a perfectly polarizing filter just the same as earlier. The other side must be a substance that can "un-polarize the light", i.e. take in polarized light and send out the same intensity as unpolarized light. 
+Since the configuration AB CD gives the regular behavior of polarizing filters, sides B and C must be those. The flipping of object CD to DC changes 
+
+\subsection*{b)}
+If i put side A next to side D i get the same as when i had side B next to side D, as A = D and these both project to the same eigenstate. 
+Unpolarizing light two times in a row does not change the light, after the first polarization it is already in an unpolarized eigenstate, and a second operation will just return the same state. 
+\end{document}
