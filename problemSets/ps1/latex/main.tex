@@ -98,7 +98,7 @@ Show that the matrix $U$ is unitary, i.e. $U^\dagger U = I$
 \end{equation}
 
 \begin{equation}
-    U^\dagger U = UU^\dagger = \frac{1}{\sqrt{2}}
+    U^\dagger U = UU^\dagger = \frac{1}{{2}}
     \left(
         \begin{matrix}
             1*1 + i*\left(-i\right) & 1*1 + i*i \\ 
@@ -133,26 +133,23 @@ we get:
             \right)
             =i\ket{-}\sim\ket{-}
         \end{equation}
-        
-\textcolor{red}{$\ket{+} and \ket{-}$ is wrong?}
-
 \begin{equation}
-    U\ket{+} = \frac{1}{2}
+    U\ket{+} = \frac{e^{\frac{-i\pi}{4}}}{2}
     \left(
         \begin{matrix}
             1+i\\1-i
         \end{matrix}
     \right)
-    =\ket{+i}
+    =e^{\frac{-i\pi}{4}}\ket{+i}
 \end{equation}
 \begin{equation}
-    U\ket{-} = \frac{1}{2}
+    U\ket{-} = \frac{e^{\frac{i\pi}{4}}}{2}
     \left(
         \begin{matrix}
             1-i\\1+i
         \end{matrix}
     \right) 
-    = \ket{+1}\ket{-i}
+    = e^{\frac{i\pi}{4}}\ket{-i}
 \end{equation}
 
 \begin{equation}
@@ -189,8 +186,37 @@ we get:
 We see that the unitary operator $U$ transforms $\ket{0}\rightarrow \ket{+}, \ket{+}\rightarrow\ket{i}, \ket{i}\rightarrow \ket{0}$, i.e. z$\rightarrow$ x, x$\rightarrow$ y, y$\rightarrow$ z
 
 \subsection*{c)}
-$U$ acts on the bloch sphere with a $120^\circ$ rotation around the $\left(1,1,1\right)$.
-
+A pure qubit has the density matrix $\rho = \frac{1}{2}\left(I+\boldsymbol{r}\cdot \boldsymbol{\sigma}\right)$, with $\boldsymbol{r} = \left(x,y,z\right)$ being its bloch vector.
+From our results in the previous task, we see that $U$ rotates the Bloch sphere, $\left(x,y,z\right) \rightarrow \left(z,x,y\right)$. From this, we easily construcs the matrix:
+\begin{equation}
+    R = 
+    \left(
+    \begin{matrix}
+        0&0&1 \\ 1&0&0 \\ 0&1&0
+    \end{matrix}
+    \right)
+\end{equation}
+We solve the equation $Rn = n$ to find the axis of rotation. 
+\begin{equation}
+    Rn = 
+    \left(
+    \begin{matrix}
+        0&0&1 \\ 1&0&0 \\ 0&1&0
+    \end{matrix}
+    \right)
+    \left(
+        \begin{matrix}
+            n_x \\ n_y \\ n_z
+        \end{matrix}
+    \right)
+    =
+    \left(
+        \begin{matrix}
+            n_x \\ n_y \\ n_z
+        \end{matrix}
+    \right)
+\end{equation}
+giving the solution $n = \frac{1}{\sqrt{3}}\left(1,1,1\right)$, i.e. axis $\left(1,1,1\right)$
 \section*{Problem 3}
 Let $\ket{0}, \ket{1},\ket{2}$ be a basis for the system.
 \subsection*{a)}
@@ -223,53 +249,207 @@ i.e. $\ket{a},\ket{b},\ket{c}$ is an orthonormal basis.
 The von neumann method of measurement is using a self-adjoint operator named an "obeservable" to conduct the measurement. 
 We take the projection of the state onto the basis:
 \begin{equation}
-    \braket{\psi|a} = \frac{1}{\sqrt{6}}\braket{0|0} + \frac{1}{\sqrt{6}}\braket{1|1}
+    \braket{\psi|a} = \frac{\sqrt{2}}{\sqrt{6}}\braket{0|0} + \frac{\sqrt{2}}{\sqrt{6}}\braket{1|1} = \sqrt{\frac{2}{3}}
 \end{equation}
 
 \begin{equation}
-    \braket{\psi|b} = \frac{1}{\sqrt{6}}\braket{0|0} - \frac{1}{\sqrt{6}}\braket{1|1}
+    \braket{\psi|b} = \frac{\sqrt{2}}{\sqrt{6}}\braket{0|0} - \frac{\sqrt{2}}{\sqrt{6}}\braket{1|1} = 0
 \end{equation}
 
 \begin{equation}
-    \braket{\psi|c} = \frac{2}{\sqrt{6}}\braket{1|1}
+    \braket{\psi|c} = \frac{\sqrt{2}}{\sqrt{6}}\braket{1|1} = \sqrt{\frac{1}{3}}
 \end{equation}
-I.e. we get probability $\frac{1}{3}$ of being in $\ket{a}$, $\frac{1}{3}$ for $\ket{b}$ and $\frac{1}{3}$ of being in state $\ket{c}$.
+I.e. we get probability $\frac{2}{3}$ of being in $\ket{a}$, $0$ for $\ket{b}$ and $\frac{1}{3}$ of being in state $\ket{c}$.
 
 For measurement of $\ket{a},\ket{b} $ and $ \ket{c}$ the state collapses to subsequantly $\ket{a},\ket{b} $ and $ \ket{c}$
 
-\textcolor{red}{What are the resulting states?}
 
 \section*{Problem 4}
 \subsection*{a)}
 Probability of transmission through a polarizer is given by Malus' law: $P = \cos^2\left(\Delta\theta\right)$
-If we assume completely unpolarixed light before the first filter, photons must rotate by 45 degrees three$\left(3\right)$ times.  the ammount of light passing through will be $\cos^2\left(45^\circ\right) \cdot \cos^2\left(45^\circ\right) \cdot \cos^2\left(45^\circ\right) = \frac{1}{8}$
+If we assume completely unpolarixed light before the first filter, photons must rotate by 45 degrees three$\left(3\right)$ times.  the ammount of light passing through will be $\frac{1}{2} \cdot \cos^2\left(45^\circ\right) \cdot \cos^2\left(45^\circ\right) = \frac{1}{8}$
 \subsection*{b)}
-For the next setup, we have two options: $\left[1\right]:~0^\circ\rightarrow30^\circ\rightarrow45^\circ\rightarrow60^\circ\rightarrow90^\circ$ or $\left[2\right]:~0^\circ\rightarrow60^\circ\rightarrow45^\circ\rightarrow30^\circ\rightarrow90^\circ$.\\
+For the next setup, we have two options: $\left[1\right]:~0^\circ\rightarrow30^\circ\rightarrow60^\circ\rightarrow90^\circ$ or $\left[2\right]:~0^\circ\rightarrow60^\circ\rightarrow30^\circ\rightarrow90^\circ$.\\
 First we check option [1]:
 \begin{equation*}
     P = \frac{1}{2} \cdot \cos^2 \left(30^\circ\right)
-                    \cdot \cos^2 \left(15^\circ\right)
-                    \cdot \cos^2 \left(15^\circ\right)
                     \cdot \cos^2 \left(30^\circ\right)
-      \approx  0.245
+                    \cdot \cos^2 \left(30^\circ\right)
+      \approx  0.211
 \end{equation*}
 and option [2]:
 \begin{equation*}
     P = \frac{1}{2} \cdot \cos^2 \left(60^\circ\right)
-                    \cdot \cos^2 \left(15^\circ\right)
-                    \cdot \cos^2 \left(15^\circ\right)
+                    \cdot \cos^2 \left(30^\circ\right)
                     \cdot \cos^2 \left(60^\circ\right)
-      \approx 0.027 
+      \approx 0.0234
 \end{equation*}
 So option [1] will let substantially more light through. 
 
 \section*{Problem 5}
 \subsection*{a)}
-if the filter gives $25\%$ regardles of orientation, we know that $\cos^2 \left(\Delta \theta\right) \cdot\cos^2 \left(\frac{\pi}{2} - \Delta \theta\right) = \frac{1}{4}$ 
-The first component of each object is a perfectly polarizing filter just the same as earlier. The other side must be a substance that can "un-polarize the light", i.e. take in polarized light and send out the same intensity as unpolarized light. 
-Since the configuration AB CD gives the regular behavior of polarizing filters, sides B and C must be those. The flipping of object CD to DC changes 
+We construct each object by combining a polarizing filter $P$ with a unitary transformation $U$. We want the unitary to have the property that light passing through the first polarizer and then through $U$ has probability $1/2$ of passing through any linear polarizer, independent of its orientation.
+
+We choose our basis such that the first polarizer transmits
+
+$$
+    \ket{0}
+    =
+    \begin{pmatrix}
+        1\\
+        0
+    \end{pmatrix}.
+$$
+
+Suppose that
+
+$$
+    U\ket{0}
+    =
+    \begin{pmatrix}
+        a\\
+        b
+    \end{pmatrix}.
+$$
+
+A linear polarizer rotated by an arbitrary angle $\theta$ transmits the state
+
+$$
+    \ket{\theta}
+    =
+    \begin{pmatrix}
+        \cos\theta\\
+        \sin\theta
+    \end{pmatrix}.
+$$
+
+We require the probability of passing through this polarizer to be $1/2$ for every $\theta$, such that
+
+$$
+    \left|\bra{\theta}U\ket{0}\right|^2
+    =
+    \left|a\cos\theta+b\sin\theta\right|^2
+    =
+    \frac{1}{2}.
+$$
+
+Expanding this expression gives
+
+$$
+    |a|^2\cos^2\theta
+    +
+    |b|^2\sin^2\theta
+    +
+    2\operatorname{Re}(a^*b)\sin\theta\cos\theta
+    =
+    \frac{1}{2}.
+$$
+
+For this to hold independently of $\theta$, we require
+
+$$
+    |a|^2=|b|^2=\frac{1}{2},
+    \qquad
+    \operatorname{Re}(a^*b)=0.
+$$
+
+A simple choice satisfying these conditions is
+
+$$
+    a=\frac{1}{\sqrt{2}},
+    \qquad
+    b=\frac{i}{\sqrt{2}},
+$$
+
+and hence
+
+$$
+    U\ket{0}
+    =
+    \frac{1}{\sqrt{2}}
+    \begin{pmatrix}
+        1\\
+        i
+    \end{pmatrix}.
+$$
+
+This determines the first column of $U$. Since $U$ must be unitary, its second column must be a normalized vector orthogonal to the first. One possible choice is
+
+$$
+    \frac{1}{\sqrt{2}}
+    \begin{pmatrix}
+        i\\
+        1
+    \end{pmatrix},
+$$
+
+giving
+
+$$
+    {
+    U=
+    \frac{1}{\sqrt{2}}
+    \begin{pmatrix}
+        1&i\\
+        i&1
+    \end{pmatrix}
+    }.
+$$
+
+Indeed, $U^\dagger U=I$.
+
+We now construct each object from one such unitary transformation and one polarizing filter. In the $ABCD$ configuration, the total transformation can be written as
+
+$$
+    U P_1 P_2 U^\dagger.
+$$
+
+The unitary transformations do not change the intensity, so the transmission probability is the same as for $P_1P_2$. Thus, the two objects behave like ordinary polarizing filters in this orientation.
+
+If one object is flipped, the essential part of the transformation becomes
+
+$$
+    P_1 U P_2.
+$$
+
+After passing through the first polarizer, the photon is in the state $\ket{0}$ in the coordinate system of that object. Applying $U$ gives
+
+$$
+    U\ket{0}
+    =
+    \frac{1}{\sqrt{2}}
+    \begin{pmatrix}
+        1\\
+        i
+    \end{pmatrix}.
+$$
+
+The probability of this state passing through the second polarizer at an arbitrary relative angle $\theta$ is
+
+$$
+\begin{aligned}
+    \left|\bra{\theta}U\ket{0}\right|^2
+    &=
+    \frac{1}{2}
+    \left|\cos\theta+i\sin\theta\right|^2\\
+    &=
+    \frac{1}{2}
+    \left(\cos^2\theta+\sin^2\theta\right)\\
+    &=
+    \frac{1}{2}.
+\end{aligned}
+$$
+
+Thus, this probability is independent of the relative angle $\theta$. Since the first polarizer transmits $1/2$ of the initially unpolarized light, the total fraction transmitted is
+
+$$
+    \frac{1}{2}\cdot\frac{1}{2}
+    =
+    {\frac{1}{4}}.
+$$
+
+Therefore, this construction produces the required $25\%$ transmission independent of the relative orientation of the two objects.
 
 \subsection*{b)}
-If i put side A next to side D i get the same as when i had side B next to side D, as A = D and these both project to the same eigenstate. 
-Unpolarizing light two times in a row does not change the light, after the first polarization it is already in an unpolarized eigenstate, and a second operation will just return the same state. 
+If we order the objects as $BADC$, we would get the effect of $PUU^\dagger P$. Using the fact that $U$ is unitary, we just get $PP$, i.e. the effect of just two normal filters next to eachother
 \end{document}
